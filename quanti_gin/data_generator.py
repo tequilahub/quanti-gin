@@ -10,6 +10,8 @@ from pathlib import Path
 from random import Random
 from typing import Any, Callable, Sequence, TypedDict
 
+import inspect
+import re
 import numpy as np
 import openfermion as of
 import pandas as pd
@@ -20,8 +22,17 @@ from numpy.typing import NDArray
 from tequila.quantumchemistry import QuantumChemistryBase
 from tqdm import tqdm
 
+from quanti_gin.spa_solve import spa_angles_for_graph
+
 from quanti_gin.shared import (
     generate_min_global_distance_edges,
+    brute_force,
+    nearest_insertion,
+    two_opt,
+    simulated_annealing,
+    genetic_algorithm,
+    minimum_weight_perfect_performance,
+    blossom_scaled,
 )
 
 logger = logging.getLogger(__name__)
@@ -147,9 +158,28 @@ class DataGenerator:
 
     @classmethod
     def run_spa_optimization(
-        cls, molecule: QuantumChemistryBase, *args, coordinates, **kwargs
+        cls,
+        molecule: QuantumChemistryBase,
+        *args,
+        coordinates,
+        key_heuristic=None,
+        num_atoms=None,
+        edges=None,
+        **kwargs,
     ):
-        edges = generate_min_global_distance_edges(coordinates)
+        if num_atoms == None:
+            num_atoms = len(coordinates)
+        if edges == None:
+            if key_heuristic == None:
+                edges = generate_min_global_distance_edges(coordinates)
+
+            else:
+                sig = inspect.signature(key_heuristic)
+                if len(sig.parameters) > 1:
+                    edges = key_heuristic(num_atoms, coordinates)
+                else:
+                    edges = key_heuristic(coordinates)
+
         initial_guess = cls.generate_initial_guess_from_edges(
             edges=edges, vertices=coordinates
         ).T
@@ -168,15 +198,26 @@ class DataGenerator:
         H = mol.make_hardcore_boson_hamiltonian()
 
         E = tq.ExpectationValue(H=H, U=U)
-        result = tq.minimize(E, silent=True)
+
+        graph = [tuple(edge) for edge in edges]
+        angles = spa_angles_for_graph(mol, graph)
+        var_dict = {}
+
+        for k, param_key in enumerate(U.make_parameter_map()):
+            var_dict[param_key] = angles[k]
+
+        result = tq.simulate(E, variables=var_dict)
+
+        # result2 = tq.minimize(E, silent=True)
 
         U_x = mol.hcb_to_me(U)
 
         return OptimizationResult(
-            energy=result.energy,
+            energy=result,
             orbital_coefficients=opt.molecule.integral_manager.orbital_coefficients,
             orbital_transformation=opt.mo_coeff,
-            variables=result.variables,
+            # variables=result.variables,
+            variables=var_dict,
             circuit=U_x,
             molecule=mol,
             custom_data=None,
@@ -217,11 +258,28 @@ class DataGenerator:
         def get_algorithm_from_method(method) -> Callable:
             if callable(method):
                 return method
-            if method == "spa":
+            if "spa" in method:
                 return cls.run_spa_optimization
             if method == "fci":
                 return cls.run_fci_optimization
             raise ValueError(f"invalid method {method}")
+
+        def extract_name(name):
+            if name.startswith("spa_"):
+                name = name[4:]
+            else:
+                name = None
+            heuristic_map = {
+                "brute_force": brute_force,
+                "nearest_insertion": nearest_insertion,
+                "two_opt": two_opt,
+                "simulated_annealing": simulated_annealing,
+                "genetic_algorithm": genetic_algorithm,
+                "minimum_weight_perfect_performance": minimum_weight_perfect_performance,
+                "spa_blossom_scaled": blossom_scaled,
+            }
+
+            return heuristic_map.get(name)
 
         jobs = []
         sizes = [2, 3, 4]
@@ -239,6 +297,11 @@ class DataGenerator:
             custom_job_data = []
 
             fidelity_flag = calculate_fidelity and method != "fci"
+            job_kwargs = {}
+            if method.startswith("spa"):
+                heuristic_name = extract_name(method)
+                job_kwargs["key_heuristic"] = heuristic_name
+                job_kwargs["num_atoms"] = number_of_atoms
 
             if custom_method:
                 job = Job(
@@ -248,6 +311,7 @@ class DataGenerator:
                     optimization_algorithm=custom_method,
                     custom_job_data=custom_job_data,
                     calculate_fidelity=fidelity_flag,
+                    kwargs={},
                 )
                 jobs.append(job)
             else:
@@ -258,6 +322,7 @@ class DataGenerator:
                     optimization_algorithm=get_algorithm_from_method(method),
                     custom_job_data=custom_job_data,
                     calculate_fidelity=fidelity_flag,
+                    kwargs=job_kwargs,
                 )
                 jobs.append(job)
 
@@ -267,6 +332,11 @@ class DataGenerator:
                     if compare == method and not custom_method:
                         continue
                     fidelity_flag = calculate_fidelity and compare != "fci"
+                    comp_kwargs = {}
+                    if method.startswith("spa"):
+                        heuristic_name = extract_name(compare)
+                        comp_kwargs["key_heuristic"] = heuristic_name
+                        comp_kwargs["num_atoms"] = number_of_atoms
                     job = Job(
                         id=i,
                         geometry=geometry,
@@ -274,6 +344,7 @@ class DataGenerator:
                         optimization_algorithm=get_algorithm_from_method(compare),
                         custom_job_data=custom_job_data,
                         calculate_fidelity=fidelity_flag,
+                        kwargs=comp_kwargs,
                     )
                     jobs.append(job)
 
@@ -449,7 +520,17 @@ def main():
         "--method",
         "-M",
         type=str,
-        choices=["fci", "spa"],
+        choices=[
+            "fci",
+            "spa",
+            "spa_brute_force",
+            "spa_nearest_insertion",
+            "spa_two_opt",
+            "spa_simulated_annealing",
+            "spa_genetic_algorithm",
+            "spa_minimum_weight_perfect_performance",
+            "spa_blossom_scaled",
+        ],
         required=False,
         default="spa",
         help="method to use for optimization, is overridden by custom-method, 'SPA' by default",
@@ -484,7 +565,17 @@ def main():
         "--compare-to",
         type=str,
         nargs="*",
-        choices=["fci", "spa"],
+        choices=[
+            "fci",
+            "spa",
+            "spa_brute_force",
+            "spa_nearest_insertion",
+            "spa_two_opt",
+            "spa_simulated_annealing",
+            "spa_genetic_algorithm",
+            "spa_minimum_weight_perfect_performance",
+            "spa_blossom_scaled",
+        ],
         help="what to compare the primary method to",
     )
 

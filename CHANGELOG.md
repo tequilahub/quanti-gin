@@ -1,5 +1,51 @@
 # Changelog
 
+## 2.0.0 (2026-07-29)
+
+
+### Features
+
+* **#24:** add orbital transform to OptimizationResult ([fc7ae6b](https://github.com/rabavikt/quanti-gin/commit/fc7ae6b67551d17b530d202b2b6f8fda41dd880a))
+* **#24:** add orbital transform to OptimizationResult ([56aa74c](https://github.com/rabavikt/quanti-gin/commit/56aa74c581a6ea6d75d7d13c012f978c14badee7))
+* add nth_best parameter to min_global_distance_edges ([1c683c4](https://github.com/rabavikt/quanti-gin/commit/1c683c4fdae3a5f82e62cc2aeb02f705623fb15d))
+* add release-please action ([1d4a1f6](https://github.com/rabavikt/quanti-gin/commit/1d4a1f6efe3c9fc70776c4563b610c5344939902))
+* add support for custom data on jobs and results ([07b313b](https://github.com/rabavikt/quanti-gin/commit/07b313b2199749dd9e1ec33264398ed9cd941230))
+* calculate fidelity ([#28](https://github.com/rabavikt/quanti-gin/issues/28)) ([0092a84](https://github.com/rabavikt/quanti-gin/commit/0092a841ca7c59492e27a3d1146a94a4b5c280e0))
+* enable automated release using poetry ([f31503c](https://github.com/rabavikt/quanti-gin/commit/f31503c2fe28caf8a75b6324ea52552529ca2cca))
+* only require energy in dict to be returned & more tweaks ([8d7041f](https://github.com/rabavikt/quanti-gin/commit/8d7041fc8603e58f702793ccd2b89ac16c640046))
+* remove variable normalization, left to the data interpreter + add custom arguments passed to optimization routine ([c28d137](https://github.com/rabavikt/quanti-gin/commit/c28d1373658867d045eb2826d25e302af59451ab))
+* reorganize and restructure for benchmark focus BREAKING ([6c703df](https://github.com/rabavikt/quanti-gin/commit/6c703df27b4a1524549f5a5fbab3ec8301f1f527))
+* reorganize and restructure for benchmark focus BREAKING ([5fae9b1](https://github.com/rabavikt/quanti-gin/commit/5fae9b13c057241bf6ae9cd5b6a372803689bc5a))
+* update minimum distance for random job generation and add parallel job execution ([6937c95](https://github.com/rabavikt/quanti-gin/commit/6937c95a6a987ec50086caf5f4bd5cc1e64d2afb))
+
+
+### Bug Fixes
+
+* actually release to testpypi with correct token ([8c0e9bf](https://github.com/rabavikt/quanti-gin/commit/8c0e9bf692da112f77c9cfe4ce84f618986a9c2d))
+* correct CI workflow and enforce formatting ([74ddbf8](https://github.com/rabavikt/quanti-gin/commit/74ddbf8c680e7d52132ccfa6179e270f09986ebb))
+* release process using different actions ([9791f46](https://github.com/rabavikt/quanti-gin/commit/9791f464e5274fd9c58889001ee258d9a6b3813c))
+* remove dependencies that are only required for execution ([d20d142](https://github.com/rabavikt/quanti-gin/commit/d20d1424e461f3bc59f90b4209aae9b0e2ed10c9))
+* remove extra whitespace from lines ([9e9307c](https://github.com/rabavikt/quanti-gin/commit/9e9307c37f8a5a6cd9d617873df75598c7a17b18))
+* remove extraneous coordinates calculation ([87510c9](https://github.com/rabavikt/quanti-gin/commit/87510c98023cc2a6ad8cd9510a9fe5e096d2bb99))
+* remove test job data & update dependencies ([ada2bca](https://github.com/rabavikt/quanti-gin/commit/ada2bca8e8f3989e0713d36820e238e6339cd05a))
+* remove test job data & update dependencies ([de535f8](https://github.com/rabavikt/quanti-gin/commit/de535f8fdccf8f8a9288fdeeb5108c4c543d41f7))
+* shared data file reader ([7d53624](https://github.com/rabavikt/quanti-gin/commit/7d53624abc065c0b9b52c90d616d3fead1971fdf))
+* try to fix release build ([ab43e4b](https://github.com/rabavikt/quanti-gin/commit/ab43e4bf104414d7ab49a4eb1668bf5d10e59ea4))
+* try to fix release build ([78d09d7](https://github.com/rabavikt/quanti-gin/commit/78d09d7e61cc8f70429d9f741d5f62a16e77068e))
+
+
+### Documentation
+
+* doc improvements for edge gen ([195b885](https://github.com/rabavikt/quanti-gin/commit/195b885d187daf6692d0424a9de86b39b2b8de41))
+* more detailed README for repository ([c564ab5](https://github.com/rabavikt/quanti-gin/commit/c564ab550485e74fba3a925ee8f4fbec7fe0a83f))
+* more detailed README for repository ([963a1c5](https://github.com/rabavikt/quanti-gin/commit/963a1c54d32b109f4e8dacdfc9ba6344e8475816))
+
+
+### Miscellaneous Chores
+
+* release 1.1.3 ([458ce43](https://github.com/rabavikt/quanti-gin/commit/458ce4369812b237e42df8209cc1a91efe0743db))
+* release 2.0.0 ([5ce8f43](https://github.com/rabavikt/quanti-gin/commit/5ce8f43181399c02f0f7922c5111fe8a7bc361a1))
+
 ## [2.5.0](https://github.com/nylser/quanti-gin/compare/v2.4.0...v2.5.0) (2025-03-26)
 
 
