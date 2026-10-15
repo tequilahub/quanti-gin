@@ -18,7 +18,8 @@ openfermion = "*"
 pyscf = "*"
 tqdm = "*"
 matplotlib = "*"
-project-sunrise = {git = "https://github.com/tequilahub/sunrise.git", branch = "devel"}
+# graph_selection is not merged into the sunrise devel branch yet, switch back to devel afterwards
+project-sunrise = {git = "https://github.com/tequilahub/sunrise.git", branch = "graph_selection"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
