@@ -1,30 +1,53 @@
-import pytest
 import numpy as np
-import tequila as tq
-from quanti_gin.data_generator import DataGenerator
+import pytest
 
-# pytestmark = pytest.mark.integration
-
-
-@pytest.fixture
-def square_coordinates():
-    return np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+from quanti_gin import run_benchmark, summarize
+from quanti_gin.examples.custom_method import run_optimization
 
 
-def test_execute_job():
-    jobs = DataGenerator.generate_jobs(
-        number_of_atoms=4, number_of_jobs=1, method="fci"
-    )
-    result = DataGenerator.execute_job(jobs[0])
-    assert "result" in result
+def test_run_benchmark():
+    results = run_benchmark("h4_random", methods=["spa_blossom", "spa_nearest_neighbour"], limit=2, progress=False)
+    assert len(results) == 4
+    assert results["energy"].notna().all()
+    # SPA is variational
+    assert np.all(results["error"] > -1e-8)
+    assert len(summarize(results)) == 2
 
 
-def test_spa_pipeline(square_coordinates):
-    geometry = DataGenerator.generate_geometry_string(square_coordinates)
-    mol = tq.Molecule(geometry=geometry, basis_set="sto-3g")
+def test_run_benchmark_fidelity():
+    results = run_benchmark("h4_chain", methods=["spa_blossom"], limit=1, calculate_fidelity=True, progress=False)
+    assert 0 < results["fidelity"][0] <= 1 + 1e-8
 
-    result = DataGenerator.run_spa_optimization(
-        molecule=mol, coordinates=square_coordinates
-    )
-    assert "energy" in result
-    assert result["energy"] is not None
+
+def test_custom_method():
+    results = run_benchmark("h4_chain", methods=[run_optimization], limit=1, progress=False)
+    assert results["energy"].notna().all()
+
+
+def test_failing_method_is_recorded():
+    def broken(molecule, **kwargs):
+        raise RuntimeError("broken method")
+
+    results = run_benchmark("h4_chain", methods=[broken], limit=1, progress=False)
+    assert "broken method" in results["exception"][0]
+
+
+def test_unknown_reference():
+    with pytest.raises(ValueError):
+        run_benchmark("h4_chain", methods=["spa_blossom"], reference="ccsdt", limit=1)
+
+
+def test_plot_results():
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from quanti_gin.visualization import plot_results
+
+    results = run_benchmark("h4_chain", methods=["spa_blossom"], limit=2, progress=False)
+    assert len(plot_results(results, show=False)) == 2
+
+
+def test_spa_clpo():
+    # CH4, the first entry of the alkanes
+    results = run_benchmark("alkanes", methods=["spa_clpo"], limit=1, progress=False)
+    assert 0 < results["error"][0] < 0.05

@@ -1,3 +1,3 @@
-from .data_generator import main
+from .cli import main
 
 main()

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "quanti-gin"
 version = "2.0.0"
-description = "A customizable data generator for quantum simulation"
+description = "A benchmark suite for quantum chemistry methods"
 authors = ["Korbinian Stein <kstein@inforbi.de>"]
 license = "MIT"
 readme = "README.md"
@@ -13,6 +13,12 @@ python = ">=3.10"
 tequila-basic = "^1.9.8"
 pandas = "^2.2.2"
 numpy = "*"
+scipy = "*"
+openfermion = "*"
+pyscf = "*"
+tqdm = "*"
+matplotlib = "*"
+project-sunrise = {git = "https://github.com/tequilahub/sunrise.git", branch = "devel"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"

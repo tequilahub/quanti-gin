@@ -2,44 +2,71 @@
 
 <img src=./quanti-gin.png width=200px alt="quanti-gin-logo">
 
-A customizable data generator for quantum simulation.
-Using this library, you can easily create larger sets of simulations and output data for optimizing molecule ground state.
-Per default, we are using [Tequila](https://github.com/tequilahub/tequila) as a quantum backend.
-
-Get started with the [tutorial](https://tequilahub.github.io/tequila-tutorials/)
+A benchmark suite for quantum chemistry methods.
+quanti-gin ships predefined benchmarks — sets of molecular geometries together with reference energies that
+are expensive to compute (FCI, CCSD(T)) — and runs methods on them.
+The methods themselves (SPA graph selection heuristics, SPA angle read-out, orbital optimization, ...) live in
+[sunrise](https://github.com/tequilahub/sunrise), quanti-gin only benchmarks them.
 
 ## Installation
 
 To install quanti-gin run `pip install quanti-gin`.
-This should install all required packages with quanti-gin.
+This installs sunrise and all other required packages.
 
 ## Usage
 
-For a basic data generation job use:
+List the predefined benchmarks and methods:
 
-    python -m quanti_gin 4 100
+    python -m quanti_gin list
 
-The basic format of the command line is:
+Run methods on a benchmark:
 
-    python -m quanti_gin <number_of_atoms> <number_of_jobs>
+    python -m quanti_gin run h6_random --methods spa_blossom spa_nearest_neighbour
 
-If you want to learn about more parameters you can use help:
+This writes one row per geometry and method to `h6_random_results.csv` (energy, error to the reference energy,
+runtime, selected SPA graph) and prints the error statistics per method.
+Use `--limit N` to only run the first `N` geometries, `--fidelity` to also compute the fidelity with the ground
+state and `-j N` to run in `N` processes. Without `--methods` the default methods of the benchmark are run.
 
-    python -m quanti_gin -h
+Plot the results:
 
-## Customize the data generator
+    python -m quanti_gin plot h6_random_results.csv
 
-quanti-gin is designed so it can be easily customized with your heuristics for data generation.
-You can create your own version by simply subclassing the `quanti_gin.DataGenerator` class.
+The same is available from python:
 
-A full example of this can be found in [examples/customized_generator.py](quanti_gin/examples/customized_generator.py).
+```python
+import quanti_gin as qg
 
-You can run the example code by executing:
+results = qg.run_benchmark("h8_ring", methods=["spa_blossom", "spa_two_opt"])
+print(qg.summarize(results))
+```
 
-    python -m quanti_gin.examples.customized_generator
+## Benchmarks
 
-## Documentation and Visualization notebook
+| benchmark | geometries | references |
+| --- | --- | --- |
+| `h{4,6,8,10,12}_random` | 50 random hydrogen clusters | HF, FCI |
+| `h{4,6,8,10,12}_chain` | linear hydrogen chains, distances 0.5–3.5 Å | HF, FCI |
+| `h{4,6,8,10,12}_ring` | hydrogen rings, nearest-neighbour distances 0.5–3.5 Å | HF, FCI |
+| `alkanes` | CH4–C8H18 at equilibrium | HF, CCSD(T), FCI where feasible |
+| `small_molecules` | H2O, NH3, CH4, HF, H2CO, C2H4, C2H2, CH3OH | HF, CCSD(T), FCI where feasible |
 
-For a more detailed introduction and background, please take a look at the [Summary](https://nylser.github.io/quanti-gin/Summary.html).
+All benchmarks use the STO-3G basis. The datasets are stored in [quanti_gin/data](quanti_gin/data) and can be
+regenerated with
 
-Additionally, for more details on how to interpret and evaluate the generated data, take a look at the [Visualization notebook](./notebooks/Visualization.ipynb).
+    python -m quanti_gin generate [benchmark ...]
+
+The reference energies are computed with PySCF without point group symmetry; for FCI several roots are
+converged in the singlet sector and the lowest one is kept, since the default FCI guess misses the ground
+state of symmetric geometries such as the rings.
+
+## Custom methods
+
+Any function `run_optimization(molecule, coordinates=..., **kwargs)` that returns a dict with the `"energy"`
+can be benchmarked. It receives the sunrise molecule of each geometry.
+If it also returns the `"circuit"`, its `"variables"` and the `"molecule"`, the fidelity can be computed.
+An example can be found in [examples/custom_method.py](quanti_gin/examples/custom_method.py):
+
+    python -m quanti_gin run h4_chain --custom-method quanti_gin/examples/custom_method.py
+
+New benchmarks are added with `quanti_gin.register(quanti_gin.Benchmark(...))`.

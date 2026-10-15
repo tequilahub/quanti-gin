@@ -30,7 +30,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -e .
-          pip install pytest pyscf numpy tequila-basic qulacs openfermion scipy
+          pip install pytest
 
       - name: Run Tests
         run: pytest tests/ -v
