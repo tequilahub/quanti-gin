@@ -47,7 +47,9 @@ def plot_results(results, methods=None, show=True):
     figures = []
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    _boxplot(data, "error", methods, axes[0], f"E - E({data['reference'].iloc[0]}) (Eh)")
+    _boxplot(
+        data, "error", methods, axes[0], f"E - E({data['reference'].iloc[0]}) (Eh)"
+    )
     axes[0].set_title("Error per method")
     _boxplot(data, "runtime", methods, axes[1], "runtime (s)")
     axes[1].set_title("Runtime per method")
@@ -58,14 +60,28 @@ def plot_results(results, methods=None, show=True):
     reference = data.drop_duplicates("id").sort_values("id")
     numeric = pd.api.types.is_numeric_dtype(reference["parameter"])
     x = reference["parameter"] if numeric else reference["id"]
-    ax.plot(x, reference["reference_energy"], color="black", linewidth=2, label=reference["reference"].iloc[0])
+    ax.plot(
+        x,
+        reference["reference_energy"],
+        color="black",
+        linewidth=2,
+        label=reference["reference"].iloc[0],
+    )
     for method in methods:
         df = data[data["method"] == method].sort_values("id")
-        ax.plot(df["parameter"] if numeric else df["id"], df["energy"], marker="o", markersize=3, label=method)
+        ax.plot(
+            df["parameter"] if numeric else df["id"],
+            df["energy"],
+            marker="o",
+            markersize=3,
+            label=method,
+        )
     if not numeric:
         ax.set_xticks(reference["id"], reference["parameter"], rotation=45)
     name = data["benchmark"].iloc[0]
-    ax.set_xlabel(f"{name}: {BENCHMARKS[name].parameter if name in BENCHMARKS else 'parameter'}")
+    ax.set_xlabel(
+        f"{name}: {BENCHMARKS[name].parameter if name in BENCHMARKS else 'parameter'}"
+    )
     ax.set_ylabel("energy (Eh)")
     ax.legend()
     fig.tight_layout()

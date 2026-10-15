@@ -6,7 +6,12 @@ from quanti_gin.examples.custom_method import run_optimization
 
 
 def test_run_benchmark():
-    results = run_benchmark("h4_random", methods=["spa_blossom", "spa_nearest_neighbour"], limit=2, progress=False)
+    results = run_benchmark(
+        "h4_random",
+        methods=["spa_blossom", "spa_nearest_neighbour"],
+        limit=2,
+        progress=False,
+    )
     assert len(results) == 4
     assert results["energy"].notna().all()
     # SPA is variational
@@ -15,12 +20,20 @@ def test_run_benchmark():
 
 
 def test_run_benchmark_fidelity():
-    results = run_benchmark("h4_chain", methods=["spa_blossom"], limit=1, calculate_fidelity=True, progress=False)
+    results = run_benchmark(
+        "h4_chain",
+        methods=["spa_blossom"],
+        limit=1,
+        calculate_fidelity=True,
+        progress=False,
+    )
     assert 0 < results["fidelity"][0] <= 1 + 1e-8
 
 
 def test_custom_method():
-    results = run_benchmark("h4_chain", methods=[run_optimization], limit=1, progress=False)
+    results = run_benchmark(
+        "h4_chain", methods=[run_optimization], limit=1, progress=False
+    )
     assert results["energy"].notna().all()
 
 
@@ -43,7 +56,9 @@ def test_plot_results():
     matplotlib.use("Agg")
     from quanti_gin.visualization import plot_results
 
-    results = run_benchmark("h4_chain", methods=["spa_blossom"], limit=2, progress=False)
+    results = run_benchmark(
+        "h4_chain", methods=["spa_blossom"], limit=2, progress=False
+    )
     assert len(plot_results(results, show=False)) == 2
 
 

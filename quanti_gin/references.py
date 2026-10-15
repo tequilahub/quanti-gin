@@ -16,7 +16,9 @@ MAX_FCI_DETERMINANTS = 2e7
 
 
 def _mean_field(geometry: str, basis_set: str):
-    mol = gto.M(atom=geometry, basis=basis_set, unit="angstrom", symmetry=False, verbose=0)
+    mol = gto.M(
+        atom=geometry, basis=basis_set, unit="angstrom", symmetry=False, verbose=0
+    )
     mf = scf.RHF(mol)
     mf.kernel()
     return mf

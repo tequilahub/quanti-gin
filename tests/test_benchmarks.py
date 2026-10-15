@@ -19,7 +19,9 @@ def test_geometry_roundtrip():
 
 
 def test_random_cluster():
-    coordinates = random_hydrogen_cluster(6, max_distance=2, rng=np.random.default_rng(1))
+    coordinates = random_hydrogen_cluster(
+        6, max_distance=2, rng=np.random.default_rng(1)
+    )
     assert coordinates.shape == (6, 3)
     distances = np.linalg.norm(coordinates[:, None] - coordinates[None], axis=-1)
     assert np.all(distances[np.triu_indices(6, 1)] > 0.5)
@@ -55,7 +57,9 @@ def test_dataset_matches_geometries():
     data = load_benchmark("h4_chain")
     parameter, geometry = benchmark.make_geometries()[3]
     assert data["parameter"][3] == pytest.approx(parameter)
-    assert np.allclose(parse_geometry_string(data["geometry"][3]), parse_geometry_string(geometry))
+    assert np.allclose(
+        parse_geometry_string(data["geometry"][3]), parse_geometry_string(geometry)
+    )
 
 
 def test_fci_reference_symmetric_ring():

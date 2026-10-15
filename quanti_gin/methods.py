@@ -29,7 +29,9 @@ def spa_clpo(molecule, **kwargs):
     return {"energy": opt.energy, "edges": edges}
 
 
-METHODS: dict[str, Callable] = {f"spa_{name}": partial(spa_graph, heuristic=name) for name in HEURISTICS}
+METHODS: dict[str, Callable] = {
+    f"spa_{name}": partial(spa_graph, heuristic=name) for name in HEURISTICS
+}
 METHODS["spa_clpo"] = spa_clpo
 
 
@@ -46,8 +48,12 @@ def import_custom_method(path: Path) -> Callable:
 
     custom_module = importlib.import_module(path.stem)
     if not hasattr(custom_module, "run_optimization"):
-        raise ValueError(f"invalid file {path} given for custom method, does not contain run_optimization method")
+        raise ValueError(
+            f"invalid file {path} given for custom method, does not contain run_optimization method"
+        )
     optimization_method = custom_module.run_optimization
     if not callable(optimization_method):
-        raise ValueError(f"invalid file {path} given for custom method, run_optimization is not callable")
+        raise ValueError(
+            f"invalid file {path} given for custom method, run_optimization is not callable"
+        )
     return optimization_method

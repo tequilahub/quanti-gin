@@ -21,7 +21,9 @@ def generate_geometry_string(coordinates: NDArray[np.float64], element="h") -> s
     return geom
 
 
-def random_hydrogen_cluster(count: int, max_distance: float, rng: np.random.Generator = None) -> NDArray:
+def random_hydrogen_cluster(
+    count: int, max_distance: float, rng: np.random.Generator = None
+) -> NDArray:
     """
     Random cluster: every new atom is placed at a random offset (up to max_distance in each direction)
     from a randomly chosen atom that is already placed, keeping at least 0.5 angstrom to all atoms.
@@ -49,4 +51,6 @@ def hydrogen_ring(count: int, distance: float) -> NDArray:
     """Regular polygon in the xy plane with nearest-neighbour distance `distance`."""
     radius = distance / (2 * np.sin(np.pi / count))
     angles = np.linspace(0, 2 * np.pi, count, endpoint=False)
-    return np.array([[radius * np.cos(angle), radius * np.sin(angle), 0.0] for angle in angles])
+    return np.array(
+        [[radius * np.cos(angle), radius * np.sin(angle), 0.0] for angle in angles]
+    )

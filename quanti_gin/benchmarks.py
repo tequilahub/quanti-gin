@@ -61,25 +61,36 @@ class Benchmark:
         """Compute the reference energies for all geometries and write the dataset."""
         rows = []
         geometries = self.make_geometries()
-        for i, (parameter, geometry) in enumerate(tqdm(geometries, desc=self.name, disable=not progress)):
+        for i, (parameter, geometry) in enumerate(
+            tqdm(geometries, desc=self.name, disable=not progress)
+        ):
             row = {"id": i, "parameter": parameter, "geometry": geometry}
             row.update(compute_references(geometry, self.basis_set, self.references))
             rows.append(row)
         df = pd.DataFrame(rows)
-        df.to_csv(self.path if path is None else path, index=False, float_format="%.10f")
+        df.to_csv(
+            self.path if path is None else path, index=False, float_format="%.10f"
+        )
         return df
 
 
 def _random_geometries(n_atoms, samples=RANDOM_SAMPLES, max_distance=2.75, seed=None):
     rng = np.random.default_rng(n_atoms if seed is None else seed)
     return [
-        (i, generate_geometry_string(random_hydrogen_cluster(n_atoms, max_distance=max_distance, rng=rng)))
+        (
+            i,
+            generate_geometry_string(
+                random_hydrogen_cluster(n_atoms, max_distance=max_distance, rng=rng)
+            ),
+        )
         for i in range(samples)
     ]
 
 
 def _scan_geometries(generator, n_atoms, distances=DISTANCES):
-    return [(float(d), generate_geometry_string(generator(n_atoms, d))) for d in distances]
+    return [
+        (float(d), generate_geometry_string(generator(n_atoms, d))) for d in distances
+    ]
 
 
 def _xyz_geometries(names):
@@ -87,11 +98,19 @@ def _xyz_geometries(names):
     for name in names:
         lines = (DATA_DIR / "geometries" / f"{name}.xyz").read_text().splitlines()
         n_atoms = int(lines[0])
-        geometries.append((name, "\n".join(line.strip() for line in lines[2 : 2 + n_atoms]) + "\n"))
+        geometries.append(
+            (name, "\n".join(line.strip() for line in lines[2 : 2 + n_atoms]) + "\n")
+        )
     return geometries
 
 
-GRAPH_METHODS = ["spa_nearest_neighbour", "spa_nearest_insertion", "spa_two_opt", "spa_blossom", "spa_blossom_scaled"]
+GRAPH_METHODS = [
+    "spa_nearest_neighbour",
+    "spa_nearest_insertion",
+    "spa_two_opt",
+    "spa_blossom",
+    "spa_blossom_scaled",
+]
 
 BENCHMARKS: dict[str, Benchmark] = {}
 

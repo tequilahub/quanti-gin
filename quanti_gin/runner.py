@@ -40,12 +40,16 @@ def compute_fidelity(result: dict, reference_energy: float, num_states=10) -> fl
 
     H = of.linalg.get_sparse_operator(mol.make_hamiltonian().to_openfermion())
     num_states = min(num_states, H.shape[0] - 2)
-    energies, vectors = scipy.sparse.linalg.eigsh(H, k=num_states, sigma=reference_energy)
+    energies, vectors = scipy.sparse.linalg.eigsh(
+        H, k=num_states, sigma=reference_energy
+    )
 
     fidelity = 0.0
     for k in range(num_states):
         if abs(energies[k] - reference_energy) < 1e-6:
-            fidelity += abs(state.inner(tq.QubitWaveFunction.from_array(vectors[:, k]))) ** 2
+            fidelity += (
+                abs(state.inner(tq.QubitWaveFunction.from_array(vectors[:, k]))) ** 2
+            )
     return fidelity
 
 
@@ -61,15 +65,24 @@ def execute_job(job: Job) -> dict:
         "reference_energy": reference_energy,
     }
     try:
-        molecule = sn.Molecule(geometry=entry["geometry"], basis_set=job.basis_set, backend="pyscf")
+        molecule = sn.Molecule(
+            geometry=entry["geometry"], basis_set=job.basis_set, backend="pyscf"
+        )
         start = time.time()
-        result = job.method(molecule, coordinates=parse_geometry_string(entry["geometry"]))
+        result = job.method(
+            molecule, coordinates=parse_geometry_string(entry["geometry"])
+        )
         row["runtime"] = time.time() - start
         row["energy"] = float(np.real(result["energy"]))
         row["error"] = row["energy"] - reference_energy
         if "edges" in result:
-            row["edges"] = str([tuple(int(i) for i in edge) for edge in result["edges"]])
-        if job.calculate_fidelity and {"circuit", "variables", "molecule"} <= result.keys():
+            row["edges"] = str(
+                [tuple(int(i) for i in edge) for edge in result["edges"]]
+            )
+        if (
+            job.calculate_fidelity
+            and {"circuit", "variables", "molecule"} <= result.keys()
+        ):
             row["fidelity"] = compute_fidelity(result, reference_energy)
     except Exception as e:
         row["exception"] = "".join(traceback.format_exception_only(type(e), e)).strip()
@@ -88,7 +101,9 @@ def make_jobs(
     if not methods:
         methods = benchmark.default_methods
     if reference not in benchmark.references:
-        raise ValueError(f"benchmark {benchmark.name} has no reference {reference}, available: {benchmark.references}")
+        raise ValueError(
+            f"benchmark {benchmark.name} has no reference {reference}, available: {benchmark.references}"
+        )
 
     data = benchmark.load()
     if limit is not None:
@@ -147,12 +162,22 @@ def run_benchmark(
     -------
     pd.DataFrame with one row per entry and method
     """
-    jobs = make_jobs(benchmark, methods, reference=reference, limit=limit, calculate_fidelity=calculate_fidelity)
+    jobs = make_jobs(
+        benchmark,
+        methods,
+        reference=reference,
+        limit=limit,
+        calculate_fidelity=calculate_fidelity,
+    )
     if threads:
         with multiprocessing.Pool(threads) as p:
-            rows = list(tqdm(p.imap(execute_job, jobs), total=len(jobs), disable=not progress))
+            rows = list(
+                tqdm(p.imap(execute_job, jobs), total=len(jobs), disable=not progress)
+            )
     else:
-        rows = [execute_job(job) for job in tqdm(jobs, desc="running", disable=not progress)]
+        rows = [
+            execute_job(job) for job in tqdm(jobs, desc="running", disable=not progress)
+        ]
     return pd.DataFrame(rows)
 
 
