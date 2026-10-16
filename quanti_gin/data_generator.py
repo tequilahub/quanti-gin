@@ -10,21 +10,19 @@ from pathlib import Path
 from random import Random
 from typing import Any, Callable, Sequence, TypedDict
 
-import inspect
 import re
 import numpy as np
 import openfermion as of
 import pandas as pd
 import scipy
+import sunrise as sn
 import tequila as tq
-from numpy import eye, floating
+from numpy import floating
 from numpy.typing import NDArray
 from tequila.quantumchemistry import QuantumChemistryBase
 from tqdm import tqdm
 
-from quanti_gin.spa_solve import spa_angles_for_graph
-
-from quanti_gin.shared import (
+from sunrise.graph_selection import (
     generate_min_global_distance_edges,
     brute_force,
     nearest_insertion,
@@ -33,6 +31,7 @@ from quanti_gin.shared import (
     genetic_algorithm,
     minimum_weight_perfect_performance,
     blossom_scaled,
+    run_spa_optimization,
 )
 
 logger = logging.getLogger(__name__)
@@ -131,21 +130,6 @@ class DataGenerator:
         return distances
 
     @classmethod
-    def generate_initial_guess_from_edges(
-        cls, vertices: NDArray[np.float64], edges: list[tuple[int, int]]
-    ) -> NDArray:
-        count = len(vertices)
-        if count % 2 != 0:
-            raise ValueError("count needs to be a multipe of two")
-        initial_guess = eye(count)
-        for edge in edges:
-            initial_guess[edge[0]][edge[0]] = 1.0
-            initial_guess[edge[0]][edge[1]] = 1.0
-            initial_guess[edge[1]][edge[0]] = -1.0
-            initial_guess[edge[1]][edge[1]] = 1.0
-        return initial_guess
-
-    @classmethod
     def run_fci_optimization(cls, molecule: QuantumChemistryBase, *args, **kwargs):
         return OptimizationResult(
             energy=molecule.compute_energy("fci"),
@@ -154,73 +138,6 @@ class DataGenerator:
             variables=None,
             custom_data=None,
             circuit=None,
-        )
-
-    @classmethod
-    def run_spa_optimization(
-        cls,
-        molecule: QuantumChemistryBase,
-        *args,
-        coordinates,
-        key_heuristic=None,
-        num_atoms=None,
-        edges=None,
-        **kwargs,
-    ):
-        if num_atoms == None:
-            num_atoms = len(coordinates)
-        if edges == None:
-            if key_heuristic == None:
-                edges = generate_min_global_distance_edges(coordinates)
-
-            else:
-                sig = inspect.signature(key_heuristic)
-                if len(sig.parameters) > 1:
-                    edges = key_heuristic(num_atoms, coordinates)
-                else:
-                    edges = key_heuristic(coordinates)
-
-        initial_guess = cls.generate_initial_guess_from_edges(
-            edges=edges, vertices=coordinates
-        ).T
-
-        U = molecule.make_ansatz(name="HCB-SPA", edges=edges)  # Hardcore Boson Circuit
-
-        opt = tq.chemistry.optimize_orbitals(
-            molecule.use_native_orbitals(),
-            U,
-            initial_guess=initial_guess,
-            silent=True,
-            use_hcb=True,
-        )
-
-        mol = opt.molecule
-        H = mol.make_hardcore_boson_hamiltonian()
-
-        E = tq.ExpectationValue(H=H, U=U)
-
-        graph = [tuple(edge) for edge in edges]
-        angles = spa_angles_for_graph(mol, graph)
-        var_dict = {}
-
-        for k, param_key in enumerate(U.make_parameter_map()):
-            var_dict[param_key] = angles[k]
-
-        result = tq.simulate(E, variables=var_dict)
-
-        # result2 = tq.minimize(E, silent=True)
-
-        U_x = mol.hcb_to_me(U)
-
-        return OptimizationResult(
-            energy=result,
-            orbital_coefficients=opt.molecule.integral_manager.orbital_coefficients,
-            orbital_transformation=opt.mo_coeff,
-            # variables=result.variables,
-            variables=var_dict,
-            circuit=U_x,
-            molecule=mol,
-            custom_data=None,
         )
 
     @classmethod
@@ -259,7 +176,7 @@ class DataGenerator:
             if callable(method):
                 return method
             if "spa" in method:
-                return cls.run_spa_optimization
+                return run_spa_optimization
             if method == "fci":
                 return cls.run_fci_optimization
             raise ValueError(f"invalid method {method}")
@@ -352,7 +269,7 @@ class DataGenerator:
 
     @classmethod
     def execute_job(cls, job: Job, basis_set="sto-3g"):
-        mol = tq.Molecule(geometry=job.geometry, basis_set=basis_set)
+        mol = sn.Molecule(geometry=job.geometry, basis_set=basis_set)
 
         result = job.optimization_algorithm(
             mol, coordinates=job.coordinates, **job.kwargs

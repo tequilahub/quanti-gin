@@ -43,3 +43,24 @@ You can run the example code by executing:
 For a more detailed introduction and background, please take a look at the [Summary](https://nylser.github.io/quanti-gin/Summary.html).
 
 Additionally, for more details on how to interpret and evaluate the generated data, take a look at the [Visualization notebook](./notebooks/Visualization.ipynb).
+
+## Methods in sunrise and reference datasets
+
+The SPA graph heuristics (formerly `quanti_gin.shared`, `quanti_gin.ant_colony_optimization` and the methods of
+`spa_best_n_solutions/adapted_heuristics.py`) and `DataGenerator.run_spa_optimization` /
+`generate_initial_guess_from_edges` moved to [sunrise](https://github.com/tequilahub/sunrise) as
+`sunrise.graph_selection`, with the same names and signatures.
+The SPA angle read-out (formerly `quanti_gin.spa_solve`) is now `sunrise.spafastprototype.spa_classical_solver`
+(`spa_angles_for_graph`, `hcb_model`, `spa_solve_graph`), where `hcb_model` takes the molecule and
+`spa_angles_for_graph` returns the angles as tequila variables.
+
+Reference energies that are expensive to compute (HF, FCI and CCSD(T) in STO-3G) for predefined geometries
+(random, linear and ring hydrogen clusters H4-H10, alkanes, small molecules) are stored in
+[quanti_gin/data](quanti_gin/data):
+
+```python
+from quanti_gin.shared import list_datasets, load_dataset
+
+print(list_datasets())
+data = load_dataset("h6_chain")  # columns: id, parameter, geometry, hf, fci
+```

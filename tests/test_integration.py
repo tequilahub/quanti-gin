@@ -1,7 +1,9 @@
 import pytest
 import numpy as np
-import tequila as tq
+import sunrise as sn
 from quanti_gin.data_generator import DataGenerator
+from quanti_gin.shared import list_datasets, load_dataset
+from sunrise.graph_selection import run_spa_optimization
 
 # pytestmark = pytest.mark.integration
 
@@ -21,10 +23,18 @@ def test_execute_job():
 
 def test_spa_pipeline(square_coordinates):
     geometry = DataGenerator.generate_geometry_string(square_coordinates)
-    mol = tq.Molecule(geometry=geometry, basis_set="sto-3g")
+    mol = sn.Molecule(geometry=geometry, basis_set="sto-3g")
 
-    result = DataGenerator.run_spa_optimization(
-        molecule=mol, coordinates=square_coordinates
-    )
+    result = run_spa_optimization(molecule=mol, coordinates=square_coordinates)
     assert "energy" in result
     assert result["energy"] is not None
+
+
+def test_datasets():
+    names = list_datasets()
+    assert "h4_chain" in names and "small_molecules" in names
+    for name in names:
+        data = load_dataset(name)
+        assert {"id", "parameter", "geometry", "hf"} <= set(data.columns)
+        if name.startswith("h"):
+            assert (data["fci"] <= data["hf"] + 1e-8).all()

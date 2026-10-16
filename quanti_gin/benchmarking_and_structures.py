@@ -1,5 +1,6 @@
 import quanti_gin
 import quanti_gin.data_generator
+import sunrise as sn
 import tequila as tq
 import numpy as np
 import pandas as pd
@@ -8,19 +9,20 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from quanti_gin.data_generator import DataGenerator
 from quanti_gin.data_generator import Job
-from quanti_gin.shared import minimum_weight_perfect_performance
-from quanti_gin.shared import nearest_insertion
-from quanti_gin.shared import generate_min_global_distance_edges
-from quanti_gin.shared import brute_force
-from quanti_gin.shared import simulated_annealing
-from quanti_gin.shared import two_opt
-from quanti_gin.shared import genetic_algorithm
-from quanti_gin.shared import blossom_scaled
+from sunrise.graph_selection import minimum_weight_perfect_performance
+from sunrise.graph_selection import nearest_insertion
+from sunrise.graph_selection import generate_min_global_distance_edges
+from sunrise.graph_selection import brute_force
+from sunrise.graph_selection import simulated_annealing
+from sunrise.graph_selection import two_opt
+from sunrise.graph_selection import genetic_algorithm
+from sunrise.graph_selection import blossom_scaled
+from sunrise.graph_selection import run_spa_optimization
 from quanti_gin.visualization_for_benchmarking import (
     benchmarking_data_visualize_matplotlib,
 )
 
-from quanti_gin.ant_colony_optimization import ant_colony_opt
+from sunrise.graph_selection import ant_colony_opt
 
 
 heueristics = {
@@ -102,7 +104,7 @@ def run_benchmark(num_atoms, num_jobs):
     for job in tqdm(jobs):
         coordinates = job.coordinates
         geometry = job.geometry
-        mol = tq.Molecule(geometry=geometry, basis_set="sto-3g")
+        mol = sn.Molecule(geometry=geometry, basis_set="sto-3g")
 
         for name, function in heueristics.items():
             try:
@@ -125,7 +127,7 @@ def run_benchmark(num_atoms, num_jobs):
 
                     runtime = time.time() - start_time
 
-                result = DataGenerator.run_spa_optimization(
+                result = run_spa_optimization(
                     molecule=mol, coordinates=coordinates, edges=edges
                 )
 
@@ -216,7 +218,7 @@ def run_benchmark_for_linear_molecules(
 
         # visualize_molecule(coordinates, geometry)
 
-        mol = tq.Molecule(geometry=geometry, basis_set="sto-3g")
+        mol = sn.Molecule(geometry=geometry, basis_set="sto-3g")
 
         for name, function in heueristics.items():
             try:
@@ -236,7 +238,7 @@ def run_benchmark_for_linear_molecules(
                     edges = function(coordinates)
                     runtime = time.time() - start_time
 
-                result = DataGenerator.run_spa_optimization(
+                result = run_spa_optimization(
                     molecule=mol, coordinates=coordinates, edges=edges
                 )
 
@@ -327,7 +329,7 @@ def run_benchmark_for_ring_molecules(
 
         # visualize_molecule(coordinates, geometry)
 
-        mol = tq.Molecule(geometry=geometry, basis_set="sto-3g")
+        mol = sn.Molecule(geometry=geometry, basis_set="sto-3g")
 
         for name, function in heueristics.items():
             try:
@@ -348,7 +350,7 @@ def run_benchmark_for_ring_molecules(
 
                     runtime = time.time() - start_time
 
-                result = DataGenerator.run_spa_optimization(
+                result = run_spa_optimization(
                     molecule=mol, coordinates=coordinates, edges=edges
                 )
 
