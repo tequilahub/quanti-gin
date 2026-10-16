@@ -163,3 +163,7 @@ cython_debug/
 
 # ignore vscode settings folder
 .vscode
+
+# scratch output of the quantum chemistry backends
+*_sto-3g_*.out
+timer.dat

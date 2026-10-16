@@ -13,6 +13,7 @@ python = ">=3.10"
 tequila-basic = "^1.9.8"
 pandas = "^2.2.2"
 numpy = "*"
+project-sunrise = {git = "https://github.com/tequilahub/sunrise.git", branch = "devel"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
