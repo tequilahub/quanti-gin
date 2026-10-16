@@ -276,7 +276,7 @@ class DataGenerator:
                 "simulated_annealing": simulated_annealing,
                 "genetic_algorithm": genetic_algorithm,
                 "minimum_weight_perfect_performance": minimum_weight_perfect_performance,
-                "spa_blossom_scaled": blossom_scaled,
+                "blossom_scaled": blossom_scaled,
             }
 
             return heuristic_map.get(name)
