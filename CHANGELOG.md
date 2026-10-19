@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/tequilahub/quanti-gin/compare/v3.0.0...v3.0.1) (2026-10-19)
+
+
+### Miscellaneous
+
+* publish to PyPI when a GitHub release is published, replacing release-please (3.0.0 was tagged but never reached PyPI)
+
 ## [3.0.0](https://github.com/tequilahub/quanti-gin/compare/v2.5.0...v3.0.0) (2026-10-19)
 
 
