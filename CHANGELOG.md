@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/tequilahub/quanti-gin/compare/v3.0.0...v3.0.1) (2026-10-19)
+
+
+### Continuous Integration
+
+* restore release-please and upload to PyPI with an API token ([590854f](https://github.com/tequilahub/quanti-gin/commit/590854f8eb1bc75a7c9bca3b705a250c66f2531d))
+
 ## [3.0.0](https://github.com/tequilahub/quanti-gin/compare/v2.5.0...v3.0.0) (2026-10-19)
 
 
