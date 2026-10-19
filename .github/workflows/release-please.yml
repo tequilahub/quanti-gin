@@ -25,7 +25,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: python
-      # ... rest unchanged
           # Poetry publication
       - uses: actions/checkout@v4
         # these if statements ensure that a publication only occurs when

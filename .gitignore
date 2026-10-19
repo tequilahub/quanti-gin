@@ -167,3 +167,6 @@ cython_debug/
 # scratch output of the quantum chemistry backends
 *_sto-3g_*.out
 timer.dat
+
+# macOS
+.DS_Store
