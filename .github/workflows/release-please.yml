@@ -15,20 +15,17 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/quanti-gin
-
     permissions:
+      contents: write
+      pull-requests: write
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          # this assumes that you have created a personal access token
-          # (PAT) and configured it as a GitHub action secret named
-          # `PYPI_QUANTI_GIN` (this secret name is not important).
-          token: ${{ secrets.PYPI_QUANTI_GIN }}
-          # this is a built-in strategy in release-please, see "Action Inputs"
-          # for more options
+          token: ${{ secrets.GITHUB_TOKEN }}
           release-type: python
+      # ... rest unchanged
           # Poetry publication
       - uses: actions/checkout@v4
         # these if statements ensure that a publication only occurs when
