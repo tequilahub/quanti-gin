@@ -30,6 +30,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -e .
+          pip install "project-sunrise @ git+https://github.com/tequilahub/sunrise.git@devel"
           pip install pytest pyscf numpy tequila-basic qulacs openfermion scipy
 
       - name: Run Tests

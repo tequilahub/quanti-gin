@@ -13,6 +13,10 @@ python = ">=3.10"
 tequila-basic = "^1.9.8"
 pandas = "^2.2.2"
 numpy = "*"
+
+# sunrise's graph_selection is not on PyPI yet; PyPI rejects git dependencies,
+# so it lives in its own group until project-sunrise is released with it
+[tool.poetry.group.sunrise.dependencies]
 project-sunrise = {git = "https://github.com/tequilahub/sunrise.git", branch = "devel"}
 
 [tool.poetry.group.dev.dependencies]

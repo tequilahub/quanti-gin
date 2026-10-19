@@ -11,7 +11,9 @@ Get started with the [tutorial](https://tequilahub.github.io/tequila-tutorials/)
 ## Installation
 
 To install quanti-gin run `pip install quanti-gin`.
-This should install all required packages with quanti-gin.
+quanti-gin also needs the `devel` branch of [sunrise](https://github.com/tequilahub/sunrise), which is not on PyPI yet:
+
+    pip install "project-sunrise @ git+https://github.com/tequilahub/sunrise.git@devel"
 
 ## Usage
 
